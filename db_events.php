@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $repsonseobj['error'] = $stmt->error;
             }
 
-            if (!($stmt->bind_param("ss", $un, $pw))) {
+            if (!($stmt->bind_param("ss", $un, $asEncrypted))) {
                 $responseobj['servermsg'] = "Error with bind statement to insert new user";
                 $repsonseobj['errno'] = $stmt->errno;
                 $repsonseobj['error'] = $stmt->error;
@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $responseobj['username'] = $un;
                 $responseobj['login'] = $succesfullogin;
                 $responsetxt = array(
-                    'callType' => 'register',
+                    'callType' => 'login',
                     'content' => $responseobj
                 );
                 $responsetxt = json_encode($responsetxt);

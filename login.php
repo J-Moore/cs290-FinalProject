@@ -41,7 +41,6 @@ if(isset($_SESSION['login_user'])) {
              <input type='password' id='password' /></label>
         </form>
         <div class='error-msg' id='error-msg'>
-        test
         </div>
         
         <div class='div-button' id='login-btn' onclick='loginUser()'>

@@ -92,6 +92,26 @@ function registerUser() {
   }
 }
 
+function loginresult(isLogin) {
+  if (isLogin['login'] === false) {
+    var errorDiv = document.getElementById('error-msg');
+    errorDiv.innerHTML = "";
+    
+    var badLoginMsg = document.createTextNode('Invalid username or password');
+    errorDiv.appendChild(badLoginMsg);
+  }
+  
+  if (isLogin['login'] === true) {
+    window.location = "timelines.php";
+  }
+}
+
+function invalidusername() {
+  var errorDiv = document.getElementById('error-msg');
+  var errorMsg = document.createTextNode('This username has already been registered.  Please try another.');
+  errorDiv.appendChild(errorMsg);
+}
+
 function ajaxRequest(callType, parameters) {
 
   var url =
@@ -113,13 +133,23 @@ function ajaxRequest(callType, parameters) {
       console.log(response);
       
       /*
-       * Different responses:
+       * Responses still to do:
        *  1. login successful
-       *  2. registration successful
-       *  3. login/registration invalid - could not connect to server
+       *  2. registration successful  <-- differentiate new user experience
+       *  3. login/registration invalid - could not connect to server 
        *  4. login invalid - credentials did not match
        *  5. registration invalid - username already taken
       */
+      
+      // if new user registration attempt but username is already taken
+      if (response['callType'] === 'register') {
+        invalidusername();
+      }
+      
+      // if user login successful
+      if (response['callType'] === 'login') {
+        loginresult(response['content']);
+      }
     }
   };
 
