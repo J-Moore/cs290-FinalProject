@@ -1,14 +1,37 @@
 body {
-    height: 800px;
     margin: 0;
     padding: 0;
-    width: 1024px;
-]
+}
 
-div#topbar {
+.error-msg {
+  color: red;
+  font-size: 120%;
+  font-style: italic;
+}
+
+.div-button {
+    background-color: lightblue;
+    border-radius: 8px;
+    float: left;
+    height: 50px;
+    margin: 10px;
+    padding: 5px;
+    width: 100px;
+}
+
+.div-button:hover {
+    background-color: #8AADB8;
+    cursor: pointer;
+}
+
+#topbar {
     background-color: #D4D4D4;
     height: 50px;
     width: 100%;
-    
 }
-    
+
+#register-form {
+    background-color: pink;
+    display: none;
+    opacity: 0;
+}
