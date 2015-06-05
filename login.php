@@ -9,7 +9,7 @@ $redirect = "http://" . $_SERVER['HTTP_HOST'] . $filePath;
 
 session_start();
 if(isset($_SESSION['login_user'])) {
-  header("Location: {$redirect}/timelines.php", true);
+  header("Location: {$redirect}/index.php", true);
 }
 ?>
 <!DOCTYPE html>
@@ -19,7 +19,6 @@ if(isset($_SESSION['login_user'])) {
     <meta charset='utf-8'>
     <title>Final Project CS290</title>
     <link rel="stylesheet" href="style.css">
-    <script src='jquery-2.1.4.min.js'></script>
     <script src='login.js'></script>
   </head>
   
@@ -49,6 +48,7 @@ if(isset($_SESSION['login_user'])) {
         
         <div class='div-button' id='show-register-btn' onclick='registerUser()'>
           Register as New User
+        </div>
       </div>
   </body>
 

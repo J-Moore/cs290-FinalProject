@@ -166,6 +166,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+
+    // ADD NEW TIMELINE TO LOGGED IN USER
+    
+    if (($_POST['action'] === 'addTimeline') && (isset($_SESSION['login_user'])))  {
+    
+        $timeName = htmlspecialchars($_POST['tName']);
+        $timeStart = htmlspecialchars($_POST['tStart']);
+        $timeEnd = htmlspecialchars($_POST['tEnd']);
+        
+        $responseobj['success'] = false;
+        $responseobj['timeline_name'] = $_POST['tName'];
+        $responseobj['timeline_start'] = $_POST['tStart'];
+        $responseobj['timeline_start'] = $_POST['tEnd'];
+        $responsetxt = array(
+            'callType' => 'addTimeline',
+            'content' => $responseobj
+        );
+        
+        if (!($stmt = $mysqli->prepare("INSERT INTO cs290sp15_fp_timelines (fk_user_id, name, start, end) VALUES (?, ?, ?, ?)"))) {
+            $responseobj['servermsg'] = "Add Timeline Error: Prepare failed";
+            $repsonseobj['errno'] = $stmt->errno;
+            $repsonseobj['error'] = $stmt->error;
+        }
+        
+        if (!($stmt->bind_param("isss", $_SESSION['login_user'], $timeName, $timeStart, $timeEnd))) {
+            $responseobj['servermsg'] = "Add Timeline Error: Parameter bind failed";
+            $repsonseobj['errno'] = $stmt->errno;
+            $repsonseobj['error'] = $stmt->error;
+        }
+
+        if (!$stmt->execute()) {
+            $responseobj['servermsg'] = "Add Timeline Error: Execute failed";
+            $repsonseobj['errno'] = $stmt->errno;
+            $repsonseobj['error'] = $stmt->error;
+        } else {
+            $responseobj['success'] = true;
+            $responseobj['timeline_id'] = $stmt->insert_id;
+            $responsetxt = array(
+                'callType' => 'addTimeline',
+                'content' => $responseobj
+            );
+        }
+        $responsetxt = json_encode($responsetxt);
+            
+        $stmt->close();
+        
+    }
 }
 
 echo $responsetxt;

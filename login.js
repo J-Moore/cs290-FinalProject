@@ -1,12 +1,3 @@
-function getParaString(obj) {
-  var str = [];
-  for (var key in obj) {
-    var s = encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
-    str.push(s);
-  }
-  return str.join('&');
-}
-
 function validate_fields() {
   var no_errors = true;
   var errorDiv = document.getElementById('error-msg');
@@ -102,7 +93,7 @@ function loginresult(isLogin) {
   }
   
   if (isLogin['login'] === true) {
-    window.location = "timelines.php";
+    window.location = "index.php";
   }
 }
 
@@ -157,4 +148,13 @@ function ajaxRequest(callType, parameters) {
   req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   req.send(paraString);
 
+}
+
+function getParaString(obj) {
+  var str = [];
+  for (var key in obj) {
+    var s = encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
+    str.push(s);
+  }
+  return str.join('&');
 }
