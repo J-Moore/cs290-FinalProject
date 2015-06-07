@@ -423,10 +423,15 @@ function createNewEvent() {
 }
 
 function delete_event(num) {
-  if (confirm('Are you sure you want to delete?')) {
-    alert('DELETING!');
+  if (confirm('Are you sure you want to delete this event?')) {
+    var callType = 'deleteEvent';
+    var parameters = {
+      event_id: num,
+      timeline_id: timelineID
+    }
+    ajaxRequest(callType, parameters);
   } else {
-    alert('aborting');
+    // any code for aborting delete attempt goes here
   }
 }
 
@@ -437,9 +442,6 @@ function edit_event_details(num) {
 
 function save_event_details(num) {
   var saveBool = true;
-
-    
-
   var callType = 'saveEvent';
   var parameters = {
     event_id: num,
@@ -486,10 +488,6 @@ function edit_timeline_details() {
 
 }
 
-function getTimeFromLI(liElement) {
-  
-}
-
 
 /* The following functions handle AJAX responses from db_events.php
  *
@@ -498,6 +496,8 @@ function getTimeFromLI(liElement) {
  *   -  errorMsg  -  Also displays an error statement.  -1 indicates no error msg
  *
  * responseSaveEvent(responseObj)
+ * responseAddEvent(responseObj)
+ * responseDeleteEvent(responseObj)
  *
  */
  
@@ -656,7 +656,7 @@ function responseAddEvent(responseObj) {
     newImg.setAttribute('class', 'btn_delete');
     var idName = 'delete-event' + responseObj['event_id'];
     newImg.setAttribute('id', idName);
-    var onClickCmd = 'delete_event_details(' + responseObj['event_id'] + ')';
+    var onClickCmd = 'delete_event(' + responseObj['event_id'] + ')';
     newImg.setAttribute('onclick', onClickCmd);
     newImg.setAttribute('title', 'Delete Event');
     
@@ -718,6 +718,32 @@ function responseAddEvent(responseObj) {
   }
 }
 
+function responseDeleteEvent(responseObj) {
+  var msg;
+  if (responseObj['success'] === true) {
+    msg = 'Event #' + responseObj['event_id'] + ' deleted from timeline';
+    displayServerMessage(msg, -1)
+    
+    // remove event from local array
+    console.log('DELETING');
+    console.log(timelineEvents[responseObj['event_id']])
+    timelineEvents[responseObj['event_id']] = {};
+    timelineEvents.splice(responseObj['event_id'], 1);
+    
+    // remove element from DOM
+    var ulParent = document.getElementById('event-display');
+    var deletedID = 'slider' + responseObj['deleted_id'];
+    var deletedElementSlider = document.getElementById(deletedID);
+    var deletedElementLI = deletedElementSlider.parentNode;
+    ulParent.removeChild(deletedElementLI);
+    
+    console.log('delete successful');
+  } else {
+    msg = 'Unable to Delete Event #' + responseObj['event_id'];
+    displayServerMessage(msg, responseObj['errorMsg']);
+    console.log('delete unsuccessful');
+  }
+}
 
 function ajaxRequest(callType, parameters) {
 
@@ -755,6 +781,10 @@ function ajaxRequest(callType, parameters) {
       
       if (response['callType'] === 'addEvent') {
         responseAddEvent(response['content']);
+      }
+      
+      if (response['callType'] === 'deleteEvent') {
+        responseDeleteEvent(response['content']);
       }
     }
   };

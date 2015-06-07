@@ -223,10 +223,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
           // If this triggers then somehow the timeline ID has changed without the session being updated.
           // Do not add the event in this case but instead send an error to the client
-          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.";
+          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.  Aborting Add Event.";
         } else {
         
-            // query database for password
             if (!($stmt = $mysqli->prepare("INSERT INTO cs290sp15_fp_events
                                             (fk_timeline_id, start_time, end_time, event_name)
                                             VALUES (?, ?, ?, ?)")
@@ -268,10 +267,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
           // If this triggers then somehow the timeline ID has changed without the session being updated.
           // Do not update the event in this case but instead send an error to the client
-          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.";
+          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.  Aborting save.";
         } else {
         
-            // query database for password
             if (!($stmt = $mysqli->prepare("UPDATE cs290sp15_fp_events SET
                                             start_time = ?,
                                             end_time=?,
@@ -300,6 +298,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'callType' => 'saveEvent',
                 'content' => $responseobj
             );
+            $responsetxt = json_encode($responsetxt);
+        }
+    }
+    
+// DELETE EXISTING EVENT
+    if ($_POST['action'] === 'deleteEvent') {
+    
+        $successful = false;
+        
+        if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
+          // If this triggers then somehow the timeline ID has changed without the session being updated.
+          // Do not update the event in this case but instead send an error to the client
+          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.  Aborting delete.";
+        } else {
+        
+            // check that row actually exists before deleting
+            if (!($stmt = $mysqli->prepare("SELECT * FROM cs290sp15_fp_events WHERE event_id = ?"))) {
+                $responseobj['errorMsg'] = "Error with prepare statement" . $stmt->errno . " " . $stmt->error;
+            }
+        
+            if (!($stmt->bind_param("i", $_POST['event_id']))) {
+                $responseobj['errorMsg'] = "Error binding parameters" . $stmt->errno . " " . $stmt->error;
+            }
+
+            if (!$stmt->execute()) {
+                $responseobj['errorMsg'] = "Error executing prepared statement" . $stmt->errno . " " . $stmt->error;
+            }
+            $stmt->store_result();
+            $row_count = $stmt->num_rows;
+        
+            $stmt->close();
+            
+            if ($row_count == 0) {
+                $responseobj['errorMsg'] = "Event #" . $_POST['event_id'] . " not found.  Unable to delete.";
+            } else {
+            
+            
+                if (!($stmt = $mysqli->prepare("DELETE FROM cs290sp15_fp_events WHERE event_id = ?"))) {
+                    $responseobj['errorMsg'] = "Error with prepare statement" . $stmt->errno . " " . $stmt->error;
+                }
+        
+                if (!($stmt->bind_param("i", $_POST['event_id']))) {
+                    $responseobj['errorMsg'] = "Error binding parameters" . $stmt->errno . " " . $stmt->error;
+                }
+
+                if (!$stmt->execute()) {
+                    $responseobj['errorMsg'] = "Error executing prepared statement" . $stmt->errno . " " . $stmt->error;
+                } else {
+                    $successful = true;
+                }
+                
+                $stmt->close();
+            }
+            
+            $responseobj['timeline_id'] = $_POST['timeline_id'];
+            $responseobj['deleted_id'] = $_POST['event_id'];
+            $responseobj['success'] = $successful;
+            $responsetxt = array(
+                'callType' => 'deleteEvent',
+                'content' => $responseobj
+            );
+            
             $responsetxt = json_encode($responsetxt);
         }
     }
