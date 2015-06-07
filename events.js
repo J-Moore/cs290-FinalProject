@@ -1,11 +1,7 @@
 /*
-Much credit given to the sites:
+About halfway into the event slider part of the project I came across 
 http://marcneuwirth.com/blog/2010/02/21/using-a-jquery-ui-slider-to-select-a-time-range/
-And:
-http://stackoverflow.com/questions/19696049/display-value-of-jquery-ui-sliders-if-more-than-one-slider-is-present-on-a-site
-And:
-http://stackoverflow.com/questions/6214016/jquery-ui-range-slider-tooltips-for-each-handle
-I used code from these sites in creating my sliders for this project
+and used this heavily in getting my sliders to work with a time range
 */
 
 $(document).ready(function() {
@@ -35,6 +31,8 @@ $(function() {
   
   // handler for displaying slider values
   var sliderToolTip = function(event, ui) {
+    //var curValue1 = ui.values[0] || minTime;
+    //var curValue2 = ui.values[1] || maxTime;
     var target = $(event.target).attr("id");
     var val0 = $( "#"+target ).slider("values", 0),
         val1 = $( "#"+target ).slider("values", 1),
@@ -53,6 +51,10 @@ $(function() {
     $("#"+target).children(' .ui-slider-handle').first().html(tooltip1);
     $("#"+target).children(' .ui-slider-handle').last().html(tooltip2);
     
+    
+
+    //$( startDisplay ).text(startTime + ' - ');
+    //$( endDisplay ).text(endTime);*/
   }
   
   
