@@ -9,29 +9,30 @@ http://stackoverflow.com/questions/1964839/jquery-please-wait-loading-animation
 */
 
 $(document).ready(function() {
-    $("#new-timeline").click(function() {
-        $(".create-popup").fadeIn(300);
-        
-        $("body").append("<div id='mask'></div>");
-        $("#mask").fadeIn(300);
-
-    });
     
-    $('body').on('click', 'a.close, #mask, #cancel-new-timeline', function () {
-        $(".create-popup").fadeOut(300);
-        $('#mask , .login-popup').fadeOut(300, function () {
-            $('#mask').remove();
-        });
-        $.datepicker._clearDate( "#datepicker-start" );
-        $.datepicker._clearDate( "#datepicker-end" );
-        $( "#timeline-name" ).val('');
-        $( "#error-msg" ).html('');
-        
-        return false;
-    });
 });
 
 $(function() {
+  $("#new-timeline").click(function() {
+    $(".create-popup").fadeIn(300);
+    
+    $("body").append("<div id='mask'></div>");
+    $("#mask").fadeIn(300);
+  });
+    
+  $('body').on('click', 'a.close, #mask, #cancel-new-timeline', function () {
+    $(".create-popup").fadeOut(300);
+    $('#mask , .login-popup').fadeOut(300, function () {
+      $('#mask').remove();
+    });
+    $.datepicker._clearDate( "#datepicker-start" );
+    $.datepicker._clearDate( "#datepicker-end" );
+    $( "#timeline-name" ).val('');
+    $( "#error-msg" ).html('');
+        
+    return false;
+  });
+
   $( "#datepicker-start" ).datepicker({
     defaultDate: "+1w",
     changeMonth: true,

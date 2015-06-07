@@ -93,23 +93,35 @@ $stmt->close();
 <?php
 // DISPLAY TIMELINE DATA
 echo "<table><thead></thead><tbody>";
-echo "<tr><th>";
-echo "Displaying Timeline: <strong>" . $time_name . "</strong>";
+echo "<tr><th name='" . $_SESSION['active_timeline'] . "'>";
+echo "Timeline: <strong>" . $time_name . "</strong>";
 echo "</th></tr>";
 echo "<tr><td name='" . $time_start . "'>start: " . date('M jS, Y', strtotime($time_start)) . "</td></tr>";
 echo "<tr><td name='" . $time_end . "'>end: " . date('M jS, Y', strtotime($time_end)) . "</td></tr>";
 echo "</tbody></table>";
-echo "<input type='button' class='edit-button' id='edit-timeline-details' onclick='edit_timeline_details(" . $_SESSION['active_timeline'] . ")' value='Edit Timeline Details' />";
+echo "</div>";
+
+// DISPLAY BUTTONS FOR SAVING DATA AND ADDING EVENTS
+echo "<div class='button-half'>";
+echo "<a class='button-img'>";
+echo "<img src='resources/images/add-icon.png' class='btn_add' id='add-event' onclick='addEvent()' title='Add New Event' />";
+echo "</a>";
+#echo "<a class='button-img'>";
+#echo "<img src='resources/images/save-icon.png' class='btn_edit' id='save-all-events' onclick='save_all_events()' title='Save All Changes' />";
+#echo "</a>";
+echo "</div>";
+
+#echo "<div class='edit-button-half' id='edit-timeline-details' onclick='createEvent()'><strong>Add Event</strong></div>";
+#echo "<span class='edit-button-half' id='edit-timeline-details' onclick='edit_timeline_details(" . $_SESSION['active_timeline'] . ")'><strong>Add Event</strong></span>";
 
 ?>
-          </div>
         </div>
         <ul id='event-display'>
 <?php
 // SHOW EVENTS SAVED IN DATABASE
 // START AND END TIME IS EMBEDDED IN WITH THE DOM ELEMENTS
 $errorMsg = "";
-if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_time FROM cs290sp15_fp_events WHERE fk_timeline_id = ?"))) {
+if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_time FROM cs290sp15_fp_events E WHERE fk_timeline_id = ? ORDER BY E.start_time ASC"))) {
     $errorMsg = "Prepare failed: " . $stmt->errno . " " . $stmt->error;
 } else {
     if (!($stmt->bind_param("i", $_SESSION['active_timeline']))) {
@@ -123,18 +135,41 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
             } else {
                 $stmt->store_result();
                 if ($stmt->num_rows > 0) {
+                
+                    // BUILD EACH EVENT UI DISPLAY
                     while ($stmt->fetch()) {
+                    
+                        // LI FOR THE SORTABLE FUNCTIONALITY
                         echo "<li class='ui-state-default'>";
+                        
+                        // SLIDER FOR CHANGING EVENT TIMES
                         echo "<div class='timeline-half' id='slider" . $event_id . "'></div>";
+                        
+                        // DIV WHERE NAME AND TIME IS WRITTEN OUT
                         echo "<div class='descriptor-half' id='descriptor" . $event_id . "'>";
                         echo "<table><thead></thead><tbody>";
                         echo "<tr><th name='" . $event_id . "'>" . $event_name . "</th></tr>";
                         echo "<tr><td name='" . $event_start . "'><span id='startdisplay" . $event_id . "'>";
                         echo "start: " . $event_start . "</span></td></tr>";
                         echo "<tr><td name='" . $event_end . "'><span id='enddisplay" . $event_id . "'>";
-                        echo "start: " . $event_end . "</span></td></tr>";
+                        echo "end: " . $event_end . "</span></td></tr>";
                         echo "</tbody></table>";
-                        echo "</div>\n</li>";
+                        echo "</div>\n";
+                        
+                        // EDIT & SAVE BUTTONS
+                        echo "<div class='button-half'>";
+                        echo "<a class='button-img'>";
+                        echo "<img src='resources/images/edit-icon.png' class='btn_edit' id='edit-event" . $event_id . "' onclick='edit_event_details(" . $event_id . ")' title='Edit Event Details' />";
+                        echo "</a>";
+                        echo "<a class='button-img'>";
+                        echo "<img src='resources/images/save-icon.png' class='btn_edit' id='save-event" . $event_id . "' onclick='save_event_details(" . $event_id . ")' title='Save Event Details' />";
+                        echo "</a>";
+                        echo "<a class='button-img'>";
+                        echo "<img src='resources/images/delete-icon.png' class='btn_delete' id='delete-event" . $event_id . "' onclick='delete_event(" . $event_id . ")' title='Delete Event' />";
+                        echo "</a>";
+                        echo "</div>";
+                        
+                        echo "</li>";
                     }
                 }
             }
@@ -142,10 +177,8 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
     }
 }
 ?>
-        <div id='min'></div>
-        <div id='max'></div>
+
         </ul>
-        <div id='create-event' onclick='createEvent()'>+ Create New Event</div>
       </div>
     </div>
   </body>

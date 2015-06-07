@@ -172,17 +172,32 @@ td {
     float: left;
     margin-left: 3%;
     margin-top: -18px;
-    width: 45%;
+    width: 25%;
 }
 
-.edit-button {
-    float: right;
-    margin-right: 10px;
+.edit-button-half {
+    background-color: lightblue;
+    border-radius: 8px;
+    float: left;
+    height: 90%;
+    margin-left: 5px;
+    margin-top: -12px;
+    padding: 5px;
+    text-align: center;
+    width: 20%;
 }
 
 img.btn_close {
     float: right;
     margin: -28px -28px 0 0;
+}
+
+.button-img {
+    margin: 0 5px 0 5px;
+}
+
+.button-img:hover {
+    cursor: pointer;
 }
 
 /*
