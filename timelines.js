@@ -54,7 +54,6 @@ $(function() {
 
 function openTimeline(tid) {
   var newURL = "events.php?timeline=" + tid;
-  console.log(newURL);
   window.location = newURL;
 }
 

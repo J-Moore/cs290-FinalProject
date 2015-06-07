@@ -9,7 +9,7 @@ $redirect = "http://" . $_SERVER['HTTP_HOST'] . $filePath;
 
 session_start();
 if(isset($_SESSION['login_user'])) {
-  header("Location: {$redirect}/index.php", true);
+  header("Location: {$redirect}/timelines.php", true);
 }
 ?>
 <!DOCTYPE html>

@@ -3,6 +3,11 @@ body {
     padding: 0;
 }
 
+td {
+    color: purple;
+    font-size: 80%;
+}
+
 #mask {
     display: none;
     background: #000;
@@ -52,8 +57,8 @@ body {
     background-color: #FFDAB5;
     border-radius: 15px;
     margin: 30px;
-    height: 400px;
-    width: 740px;
+    min-height: 600px;
+    min-width: 800px;
 }
 
 .create-popup {
@@ -72,7 +77,7 @@ body {
 }
 
 .timeline {
-    background-color: white;
+    background-color: #BDE0EB;  /* old value white */
     border-radius: 8px;
     border: 2px solid;
     border-color: black;
@@ -86,7 +91,7 @@ body {
 }
 
 .timeline:hover {
-    background-color: #E5E5E5;
+    background-color: #8AADB8;   /* old value #E5E5E5*/
     cursor: pointer;
 }
 
@@ -100,17 +105,56 @@ body {
     margin: 0;
     padding: 1px;
 }
+
+#map-frame {
+    background-color: grey;
+    height: 50%;
+    min-height: 300px;
+    width: 100%;
+}
+
+#event-frame {
+    background-color: white;
+    height: 50%;
+    min-height: 300px;
+    width: 100%;
+}
+
+#add-event-frame {
+    background-color: white;
+    border: 1px solid;
+    float: left;
+    height: 45px;
+    margin-bottom: 5px;
+    margin-left: 1px;
+    margin-right: 5px;
+    margin-top: 1px;
+    width: 160px;
+}
+
+#create-event {
+    background-color: white;
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    font: 80%;
+    height: 40px;
+    padding-top: 20px;
+}
+
+#timeline-base {
+    background-color: white;
+    border-top: 2px solid black;
+    font: 80%;
+    height: 40px;
+    padding-top: 20px;
+}
+
 #event-display li {
     background-color: white;
-    border-radius: 8px;
-    border: 2px solid;
-    border-color: black;
-    float: left;
+    border-top: 2px solid black;
     font: 80%;
-    height: 100px;
-    margin: 20px;
-    padding: 5px;
-    width: 125px;
+    height: 40px;
+    padding-top: 20px;
 }
 
 #event-display:hover {
@@ -118,7 +162,65 @@ body {
     cursor: pointer;
 }
 
+.timeline-half {
+    clear: left;
+    float: left;
+    width: 50%;
+}
+
+.descriptor-half {
+    float: left;
+    margin-left: 3%;
+    margin-top: -18px;
+    width: 45%;
+}
+
+.edit-button {
+    float: right;
+    margin-right: 10px;
+}
+
 img.btn_close {
     float: right;
     margin: -28px -28px 0 0;
+}
+
+/*
+source for CSS:
+http://stackoverflow.com/questions/19696049/display-value-of-jquery-ui-sliders-if-more-than-one-slider-is-present-on-a-site
+*/
+.slidertooltip {
+    position: absolute;
+    z-index: 1020;
+    display: block;
+    padding: 5px;
+    visibility: visible;
+    margin-top: -2px;
+    bottom:120%;
+    margin-left: -0.9em;
+}
+
+.slidertooltip .slidertooltip-arrow {
+    bottom: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-top: 5px solid #000000;
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.slidertooltip-inner {
+    max-width: 400px;
+    padding: 3px 8px;
+    color: #fff;
+    font-size: 60%;
+    text-align: center;
+    text-decoration: none;
+    background-color: #438EB9;
+    -webkit-border-radius: 4px;
+       -moz-border-radius: 4px;
+            border-radius: 4px;
 }

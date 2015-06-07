@@ -93,7 +93,7 @@ function loginresult(isLogin) {
   }
   
   if (isLogin['login'] === true) {
-    window.location = "index.php";
+    location.replace("timelines.php");
   }
 }
 
