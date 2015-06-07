@@ -1,3 +1,41 @@
+/**
+ * fade-in and fade-out functions
+ *
+ * code source:
+ * http://stackoverflow.com/questions/6121203/how-to-do-fade-in-and-fade-out-with-javascript-and-css
+ */
+  
+function fade_out(element) {
+  
+  var op = 1;  // initial opacity
+  var timer = setInterval(function () {
+    if (op <= 0.1){
+      clearInterval(timer);
+      element.style.display = 'none';
+    }
+    element.style.opacity = op;
+    element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+    op -= op * 0.1;
+  }, 50);
+}
+
+function fade_in(element) {
+
+  if (element.style.display != 'block') {
+    var op = 0.1;
+    element.style.display = 'block';
+    var timer = setInterval(function () {
+      if (op >= 1){
+        clearInterval(timer);
+      }
+      element.style.opacity = op;
+      element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+      op += op * 0.1;
+    }, 10);
+  }
+}
+
+
 /*
 About halfway into the event slider part of the project I came across 
 http://marcneuwirth.com/blog/2010/02/21/using-a-jquery-ui-slider-to-select-a-time-range/
@@ -194,16 +232,50 @@ function edit_event_details(num) {
 }
 
 function save_event_details(num) {
-  callType = 'saveEvent';
-  parameters = {
+  var saveBool = true;
+
+    
+
+  var callType = 'saveEvent';
+  var parameters = {
+    event_id: num,
     name: timelineEvents[num]['name'],
     timeline_id: timelineID,
     start_time: convertToSQLDatestring(timelineEvents[num]['start_time']),
     end_time: convertToSQLDatestring(timelineEvents[num]['end_time'])
   }
+
+  // Checking that values are defined for variables we need to save to the database
+  if (typeof parameters['name'] === 'undefined') {
+    alert('Error: Event Name is Undefined.  Unable to save.');
+    saveBool = false;
+  }
+  
+  if (parameters['timeline_id'] == 0) {
+    alert('Error: Timeline ID is Undefined.  Unable to save.');
+    saveBool = false;
+  }
+  
+  if (parameters['event_id'] == 0) {
+    alert('Error: Event ID is Undefined.  Unable to save.');
+    saveBool = false;
+  }
+  
+  if (typeof parameters['start_time'] === 'undefined') {
+    alert('Error: Event Starting Time is Undefined.  Unable to save.');
+    saveBool = false;
+  }
+  
+  if (typeof parameters['end_time'] === 'undefined') {
+    alert('Error: Event Ending Time is Undefined.  Unable to save.');
+    saveBool = false;
+  }
   
   console.log(parameters);
-  //ajaxRequest('saveEvent', timelineEvents[num]);
+  
+  if (saveBool == true) {
+    ajaxRequest(callType, parameters);
+  }
 }
 
 function edit_timeline_details() {
@@ -215,6 +287,48 @@ function getTimeFromLI(liElement) {
 }
 
 
+/* The following functions handle AJAX responses from db_events.php
+ *
+ * displayServerMessage(msg, errorMsg)
+ *   -  msg  -  Displays this message on a div that fades out after 2 sec
+ *   -  errorMsg  -  Also displays an error statement.  -1 indicates no error msg
+ *
+ * responseSaveEvent(responseObj)
+ *
+ */
+ 
+function displayServerMessage(msg, errorMsg) {
+  var msgDiv = document.getElementById('server-message-div');
+  msgDiv.style.backgroundColor = '#FF8700';
+  msgDiv.innerHTML = msg;
+  
+  if (errorMsg != -1) {
+    var errorP = document.createElement('p');
+    var errorTxt = document.createTextNode(errorMsg);
+    errorP.appendChild(errorTxt);
+    msgDiv.appendChild(errorP);
+  }
+  fade_in(msgDiv);
+  
+  window.setInterval(function() {
+    fade_out(msgDiv);
+  }, 2000);
+}
+
+function responseSaveEvent(responseObj) {
+  var msg ;
+  if (responseObj['success'] === true) {
+    msg = 'Event #' + responseObj['event_id'] + ' saved to timeline #' + responseObj['timeline_id'];
+    displayServerMessage(msg, -1)
+    console.log('save successful');
+  } else {
+    msg = 'Unable to Save Event #' + responseObj['event_id'] + ' to timeline #' + responseObj['timeline_id'];
+    displayServerMessage(msg, responseObj['errorMsg']);
+    console.log('save unsuccessful');
+  }
+}
+
+
 function ajaxRequest(callType, parameters) {
 
   var url =
@@ -223,6 +337,8 @@ function ajaxRequest(callType, parameters) {
 
   var paraString = 'action=' + callType + '&' + getParaString(parameters);
   var urlString = url + phpFile;
+  
+  console.log(paraString);
 
   var req = new XMLHttpRequest();
   if (!req) {
@@ -233,16 +349,17 @@ function ajaxRequest(callType, parameters) {
     if (this.readyState === 4) {
       var response = JSON.parse(this.responseText);
 
+      console.log('JSON RESPONSE OBJECT:');
       console.log(response);
       
       /* Responses:
-       *  1. added successfully
-       *  2. unable to add
+       *  1. event saved successfully
+       *  2. event saved unsuccessfully
        */
-       
-       if (response['callType'] === 'saveEvent') {
-         gotoTimeline(response['content']);
-       }
+    
+      if (response['callType'] === 'saveEvent') {
+        responseSaveEvent(response['content']);
+      }
     }
   };
 

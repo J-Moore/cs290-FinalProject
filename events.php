@@ -76,6 +76,10 @@ $stmt->close();
       <div class='top-element' id='log-out-btn'><a href="logout.php" class='logout-btn'>Log out</a></div>
     </div>
     
+        
+    <!-- DIV FOR DISPLAYING MESSAGES REGARDING DATABASE CHANGES -->
+    <div id='server-message-div'></div>
+    
     <!-- MAIN DIV -->
     
     <div class='main-screen'>
@@ -181,6 +185,7 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
         </ul>
       </div>
     </div>
+    
   </body>
 
 </html>

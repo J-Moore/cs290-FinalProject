@@ -16,7 +16,8 @@ $encryptionCipher = mcrypt_module_open(MCRYPT_BLOWFISH,'','cbc','');
 $responsetxt = "no response";
 $responseobj = array(
     'username' => "",
-    'login' => false
+    'login' => false,
+    'errorMsg' => ""
 );
 
 include 'local_settings.php';
@@ -213,6 +214,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
         
     }
+    
+// SAVE EXISTING EVENT
+    if ($_POST['action'] === 'saveEvent') {
+    
+        // $successfullogin will switch to true if username and password match
+        $successfulsave = false;
+        
+        if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
+          // If this triggers then somehow the timeline ID has changed without the session being updated.
+          // Do not update the event in this case but instead send an error to the client
+          
+        } else {
+        
+            // query database for password
+            if (!($stmt = $mysqli->prepare("UPDATE cs290sp15_fp_events SET
+                                            start_time = ?,
+                                            end_time=?,
+                                            event_name=?
+                                            WHERE event_id = ?")
+            )) {
+                $responseobj['errorMsg'] = "Error with prepare statement" . $stmt->errno . " " . $stmt->error;
+            }
+        
+            if (!($stmt->bind_param("sssi", $_POST['start_time'], $_POST['end_time'], $_POST['name'], $_POST['event_id']))) {
+                $responseobj['errorMsg'] = "Error binding parameters" . $stmt->errno . " " . $stmt->error;
+            }
+
+            if (!$stmt->execute()) {
+                $responseobj['errorMsg'] = "Error executing prepared statement" . $stmt->errno . " " . $stmt->error;
+            } else {
+                $successfulsave = true;
+            }
+
+            $stmt->close();
+        
+            $responseobj['timeline_id'] = $_POST['timeline_id'];
+            $responseobj['event_id'] = $_POST['event_id'];
+            $responseobj['success'] = $successfulsave;
+            $responsetxt = array(
+                'callType' => 'saveEvent',
+                'content' => $responseobj
+            );
+            $responsetxt = json_encode($responsetxt);
+        }
+    }
+ 
 }
 
 echo $responsetxt;
