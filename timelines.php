@@ -109,7 +109,7 @@ if (!($stmt = $mysqli->prepare("SELECT timeline_id, name, start, end FROM cs290s
 
     <div class='loading-overlay'></div>
     
-    </div>
+    </div>  <!-- MAIN DISPLAY DIV CLOSING BRACKET -->
     
     
   </body>

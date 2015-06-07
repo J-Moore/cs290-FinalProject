@@ -214,17 +214,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
         
     }
+
+// CREATE NEW EVENT FOR TIMELINE
+    if ($_POST['action'] === 'addEvent') {
     
+        $successfulsave = false;
+        
+        if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
+          // If this triggers then somehow the timeline ID has changed without the session being updated.
+          // Do not add the event in this case but instead send an error to the client
+          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.";
+        } else {
+        
+            // query database for password
+            if (!($stmt = $mysqli->prepare("INSERT INTO cs290sp15_fp_events
+                                            (fk_timeline_id, start_time, end_time, event_name)
+                                            VALUES (?, ?, ?, ?)")
+            )) {
+                $responseobj['errorMsg'] = "Error with prepare statement" . $stmt->errno . " " . $stmt->error;
+            }
+        
+            if (!($stmt->bind_param("isss", $_POST['timeline_id'], $_POST['start_time'], $_POST['end_time'], $_POST['name']))) {
+                $responseobj['errorMsg'] = "Error binding parameters" . $stmt->errno . " " . $stmt->error;
+            }
+
+            if (!$stmt->execute()) {
+                $responseobj['errorMsg'] = "Error executing prepared statement" . $stmt->errno . " " . $stmt->error;
+            } else {
+                $successfulsave = true;
+                $responseobj['event_id'] = $mysqli->insert_id;
+            }
+
+            $stmt->close();
+        
+            $responseobj['timeline_id'] = $_POST['timeline_id'];
+            $responseobj['success'] = $successfulsave;
+            $responseobj['start_time'] = $_POST['start_time'];
+            $responseobj['end_time'] = $_POST['end_time'];
+            $responseobj['name'] = $_POST['name'];
+            $responsetxt = array(
+                'callType' => 'addEvent',
+                'content' => $responseobj
+            );
+            $responsetxt = json_encode($responsetxt);
+        }
+    }
+ 
 // SAVE EXISTING EVENT
     if ($_POST['action'] === 'saveEvent') {
     
-        // $successfullogin will switch to true if username and password match
         $successfulsave = false;
         
         if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
           // If this triggers then somehow the timeline ID has changed without the session being updated.
           // Do not update the event in this case but instead send an error to the client
-          
+          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.";
         } else {
         
             // query database for password

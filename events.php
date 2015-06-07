@@ -108,7 +108,7 @@ echo "</div>";
 // DISPLAY BUTTONS FOR SAVING DATA AND ADDING EVENTS
 echo "<div class='button-half'>";
 echo "<a class='button-img'>";
-echo "<img src='resources/images/add-icon.png' class='btn_add' id='add-event' onclick='addEvent()' title='Add New Event' />";
+echo "<img src='resources/images/add-icon.png' class='btn_add' id='add-event' title='Add New Event' />";
 echo "</a>";
 #echo "<a class='button-img'>";
 #echo "<img src='resources/images/save-icon.png' class='btn_edit' id='save-all-events' onclick='save_all_events()' title='Save All Changes' />";
@@ -144,7 +144,7 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
                     while ($stmt->fetch()) {
                     
                         // LI FOR THE SORTABLE FUNCTIONALITY
-                        echo "<li class='ui-state-default'>";
+                        echo "<li class='ui-state-default' >";
                         
                         // SLIDER FOR CHANGING EVENT TIMES
                         echo "<div class='timeline-half' id='slider" . $event_id . "'></div>";
@@ -160,7 +160,7 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
                         echo "</tbody></table>";
                         echo "</div>\n";
                         
-                        // EDIT & SAVE BUTTONS
+                        // EDIT & SAVE & DELETE BUTTONS
                         echo "<div class='button-half'>";
                         echo "<a class='button-img'>";
                         echo "<img src='resources/images/edit-icon.png' class='btn_edit' id='edit-event" . $event_id . "' onclick='edit_event_details(" . $event_id . ")' title='Edit Event Details' />";
@@ -184,6 +184,43 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
 
         </ul>
       </div>
+      
+      <div id='overlay' class='create-popup'>
+      <a href="#" class="close"><img src="resources/images/close.png" class="btn_close" title="Close Window" alt="Close" /></a>
+      <p>Create New Event
+      <form id='create-event-form'>
+        <p><label>Name
+           <input type='text' id='event-name' value='New Event' /></label>
+        <p><label>Start Date & Time:
+           <input type='text' id='datepicker-start' /></label>
+           <input type='number' id='time-hour-start' min=0 max=23 value=0 /> :
+           <input type='number' id='time-min-start' min=0 max=59 value=0 />
+           <select id='select-ampm-start'>
+             <option>AM</option>
+             <option>PM</option>
+           </select>
+           
+        <p><label>End Date & Time:
+           <input type='text' id='datepicker-end' /></label>
+           <input type='number' id='time-hour-end' min=0 max=23 value=0 /> :
+           <input type='number' id='time-min-end' min=0 max=59 value=0 />
+           <select id='select-ampm-end'>
+             <option>AM</option>
+             <option>PM</option>
+           </select>
+           
+        <div class='error-msg' id='error-msg'></div>
+        
+        <div class='div-button' id='create-new-event' onclick='createNewEvent()'>
+          Create!
+        </div>
+        
+        <div class='div-button' id='cancel-new-event'>
+          Cancel
+        </div>
+      </form>
+      </div>
+    
     </div>
     
   </body>
