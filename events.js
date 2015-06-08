@@ -4,12 +4,50 @@ http://marcneuwirth.com/blog/2010/02/21/using-a-jquery-ui-slider-to-select-a-tim
 and used this heavily in getting my sliders to work with a time range
 */
 
+
 // data stored for current timeline
 var timelineEvents = [];
 var timelineID = 0;
 var timelineStartDate;
 var timelineEndDate;
-  
+var selectedEvent = 0;
+
+// map object
+var map;
+
+// handler for selecting LI items
+document.addEventListener('click', function(e) {
+    try {
+      //get LI item clicked on (or children thereof) or return false
+      var clickedLI;
+      var selected;
+      if (e.target.id) {
+        clickedLI = $(e.target);
+        selected = e.target.id;
+      } else {
+        clickedLI = $(e.target).parents( "li" )[0];
+        selected = clickedLI.id;
+      }
+      console.log(selected);
+      if (typeof selected == 'undefined' || selected == 'event-frame') {
+        return false;
+      }
+      var ulParent = document.getElementById('event-display');
+      clickedLI = document.getElementById(selected);
+      
+      selectedEvent = selected.slice(2);
+      console.log(selectedEvent);
+      for (i = 0; i < ulParent.children.length; i++) {
+        ulParent.children[i].children[1].style.backgroundColor = "white";
+      }
+      clickedLI.children[1].style.backgroundColor = "yellow";
+    }
+    catch(err) {
+      return false;
+    }
+    
+});
+
   // handler for displaying slider values
 var sliderToolTip = function(event, ui) {
     var target = $(event.target).attr("id");
@@ -42,6 +80,8 @@ var sliderToolTip = function(event, ui) {
 }
 
 $(function() {
+
+  
   $( "#event-display" ).sortable();
   $( "#event-display" ).disableSelection();
   $( "#event-display" ).selectable();
@@ -53,6 +93,9 @@ $(function() {
   var minTimeStr = sliders[0].parentNode.children[2].children[0].lastChild.children[1].children[0].getAttribute("name");
   var maxTimeStr = sliders[0].parentNode.children[2].children[0].lastChild.children[2].children[0].getAttribute("name");
   timelineID = timeIDname[0].children[0].lastChild.children[0].children[0].getAttribute("name");
+  
+  initializeTimelineEvents(timelineID);
+
   
   // add time to date strings
   minTimeStr += " 00:00:00";
@@ -227,6 +270,91 @@ $(function() {
   
 });
 
+// MAPBOX INITIALIZATION
+function initializeMap() {
+  // map access token
+  L.mapbox.accessToken = 'pk.eyJ1Ijoiai1tb29yZSIsImEiOiJhMzFiMWIyYWFiOGMyZTczOTM2ZjBjZjk1NTIzYWY4NyJ9.dvPQWT33K5g0bKISMupjVQ';
+  map = L.mapbox.map('map-frame', 'mapbox.streets');
+  
+  var lastLat = 44.5654;
+  var lastLng = -123.27605;
+  var lastZoom = 5;
+  
+  for (var i = 0; i < timelineEvents.length; i++) {
+    console.log(timelineEvents[i]);
+    if (typeof timelineEvents[i] == 'undefined') {
+      continue;
+    }
+    if (!isNaN(timelineEvents[i]['lat']) && !isNaN(timelineEvents[i]['lng'])) {
+      timelineEvents[i]['marker'] = L.marker(new L.LatLng(timelineEvents[i]['lat'], timelineEvents[i]['lng']), {
+        icon: L.mapbox.marker.icon({
+          'marker-color': 'ff8888'
+        })
+      }).bindPopup(timelineEvents[i]['name']).addTo(map);
+      
+      lastLat = timelineEvents[i]['lat'];
+      lastLng = timelineEvents[i]['lng'];
+      lastZoom = 9;
+      
+    }
+  }
+  
+  map.setView([lastLat, lastLng], lastZoom);
+  
+  
+  var click = document.getElementById('click');
+  
+  map.on('click', function(e) {
+    console.log(e.latlng.toString());
+    console.log(e.latlng);
+
+      
+    if (typeof timelineEvents[selectedEvent] != 'undefined') {
+      console.log('old lat', timelineEvents[selectedEvent]['lat']);
+      console.log('old lng', timelineEvents[selectedEvent]['lng']);
+      
+      // if no marker exists for this then create one
+      if (isNaN(timelineEvents[selectedEvent]['lat']) && isNaN(timelineEvents[selectedEvent]['lng'])) {
+        timelineEvents[selectedEvent]['lat'] = e.latlng.lat;
+        timelineEvents[selectedEvent]['lng'] = e.latlng.lng;
+        timelineEvents[selectedEvent]['marker'] = L.marker(new L.LatLng(timelineEvents[selectedEvent]['lat'],
+                                                                        timelineEvents[selectedEvent]['lng']), {
+          icon: L.mapbox.marker.icon({
+            'marker-color': 'ff8888'
+          })
+        }).bindPopup(timelineEvents[selectedEvent]['name']).addTo(map);
+      }
+      
+      // otherwise update current marker
+      else {
+        timelineEvents[selectedEvent]['lat'] = e.latlng.lat;
+        timelineEvents[selectedEvent]['lng'] = e.latlng.lng;
+        var newLatLng = new L.LatLng(e.latlng.lat, e.latlng.lng);
+        timelineEvents[selectedEvent]['marker'].setLatLng(newLatLng);
+      }
+
+      
+    }
+    console.log(timelineEvents[selectedEvent + '']);
+    console.log(timelineEvents);
+    
+    
+  });
+  
+  
+
+}
+
+function initializeTimelineEvents(tid) {
+  var callType = 'getEventData';
+  var parameters = {
+    timeline_id: tid
+  };
+  
+  //console.log(parameters);
+  
+  ajaxRequest(callType, parameters);
+}
 // TIME CONVERSION FUNCTIONS -- massaging time data for SQL storage and displaying in forms
 
 function timeToValue(time, base) {
@@ -744,7 +872,9 @@ function save_event_details(num) {
     name: timelineEvents[num]['name'],
     timeline_id: timelineID,
     start_time: convertToSQLDatestring(timelineEvents[num]['start_time']),
-    end_time: convertToSQLDatestring(timelineEvents[num]['end_time'])
+    end_time: convertToSQLDatestring(timelineEvents[num]['end_time']),
+    lat: timelineEvents[num]['lat'],
+    lng: timelineEvents[num]['lng']
   }
 
   // Checking that values are defined for variables we need to save to the database
@@ -785,7 +915,7 @@ function edit_timeline_details() {
 }
 
 
-/* The following functions handle AJAX responses from db_events.php
+/** The following functions handle AJAX responses from db_events.php
  *
  * displayServerMessage(msg, errorMsg)
  *   -  msg  -  Displays this message on a div that fades out after 2 sec
@@ -794,7 +924,7 @@ function edit_timeline_details() {
  * responseSaveEvent(responseObj)
  * responseAddEvent(responseObj)
  * responseDeleteEvent(responseObj)
- *
+ * responseFillEventData(responseObj)
  */
  
 function displayServerMessage(msg, errorMsg) {
@@ -845,6 +975,8 @@ function responseAddEvent(responseObj) {
     // NEW LI ELEMENT
     var newLI = document.createElement('li');
     newLI.setAttribute('class', 'ui-state-default');
+    var liid = 'li' + responseObj['event_id'];
+    newLI.setAttribute('id', liid);
     
     // 1.
     // NEW SLIDER DIV WITHIN LI ELEMENT
@@ -1041,6 +1173,26 @@ function responseDeleteEvent(responseObj) {
   }
 }
 
+function responseFillEventData(responseObj) {
+  console.log(responseObj);
+  var iter = responseObj['num_events'];
+  
+  for (var i = 0; i < iter; i++) {
+    var eid = responseObj[i]['id'] + "";
+    
+    timelineEvents[eid]['id'] = parseInt(responseObj[i]['id']);
+    timelineEvents[eid]['name'] = responseObj[i]['name'];
+    timelineEvents[eid]['start_time'] = responseObj[i]['start_time'];
+    timelineEvents[eid]['end_time'] = responseObj[i]['end_time'];
+    timelineEvents[eid]['lat'] = parseFloat(responseObj[i]['lat']);
+    timelineEvents[eid]['lng'] = parseFloat(responseObj[i]['lng']);
+    
+  }
+  
+  console.log(timelineEvents);
+  initializeMap();
+}
+
 function ajaxRequest(callType, parameters) {
 
   var url =
@@ -1081,6 +1233,10 @@ function ajaxRequest(callType, parameters) {
       
       if (response['callType'] === 'deleteEvent') {
         responseDeleteEvent(response['content']);
+      }
+      
+      if (response['callType'] === 'getEventData') {
+        responseFillEventData(response['content']);
       }
     }
   };

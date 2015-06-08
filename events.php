@@ -59,9 +59,11 @@ $stmt->close();
     <meta charset='utf-8'>
     <title>Final Project CS290</title>
     <link rel="stylesheet" href="resources/jquery-ui.min.css" />
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.css' rel='stylesheet' />
     <link rel="stylesheet" href="style.css" type="text/css" />
     <script src='resources/jquery-2.1.4.min.js'></script>
     <script src='resources/jquery-ui.min.js'></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.9/mapbox.js'></script>
     <script src='events.js'></script>
   </head>
   
@@ -144,7 +146,7 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
                     while ($stmt->fetch()) {
                     
                         // LI FOR THE SORTABLE FUNCTIONALITY
-                        echo "<li class='ui-state-default' >";
+                        echo "<li class='ui-state-default' id='li" . $event_id . "' >";
                         
                         // SLIDER FOR CHANGING EVENT TIMES
                         echo "<div class='timeline-half' id='slider" . $event_id . "'></div>";

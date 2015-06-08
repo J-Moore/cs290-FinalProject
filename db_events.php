@@ -223,8 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
           // If this triggers then somehow the timeline ID has changed without the session being updated.
           // Do not add the event in this case but instead send an error to the client
-          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.  Aborting Add Event.";
-        } else {
+          $responseobj['errorMsg'] = "Warning: Timeline id conflict.  Active session timeline does not match ajax call.";
+        }
         
             if (!($stmt = $mysqli->prepare("INSERT INTO cs290sp15_fp_events
                                             (fk_timeline_id, start_time, end_time, event_name)
@@ -256,7 +256,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'content' => $responseobj
             );
             $responsetxt = json_encode($responsetxt);
-        }
     }
  
 // SAVE EXISTING EVENT
@@ -267,39 +266,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
           // If this triggers then somehow the timeline ID has changed without the session being updated.
           // Do not update the event in this case but instead send an error to the client
-          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.  Aborting save.";
-        } else {
-        
-            if (!($stmt = $mysqli->prepare("UPDATE cs290sp15_fp_events SET
-                                            start_time = ?,
-                                            end_time=?,
-                                            event_name=?
-                                            WHERE event_id = ?")
-            )) {
-                $responseobj['errorMsg'] = "Error with prepare statement" . $stmt->errno . " " . $stmt->error;
-            }
-        
-            if (!($stmt->bind_param("sssi", $_POST['start_time'], $_POST['end_time'], $_POST['name'], $_POST['event_id']))) {
-                $responseobj['errorMsg'] = "Error binding parameters" . $stmt->errno . " " . $stmt->error;
-            }
-
-            if (!$stmt->execute()) {
-                $responseobj['errorMsg'] = "Error executing prepared statement" . $stmt->errno . " " . $stmt->error;
-            } else {
-                $successfulsave = true;
-            }
-
-            $stmt->close();
-        
-            $responseobj['timeline_id'] = $_POST['timeline_id'];
-            $responseobj['event_id'] = $_POST['event_id'];
-            $responseobj['success'] = $successfulsave;
-            $responsetxt = array(
-                'callType' => 'saveEvent',
-                'content' => $responseobj
-            );
-            $responsetxt = json_encode($responsetxt);
+          $responseobj['errorMsg'] = "Warning: Timeline conflict.  Active session timeline does not match ajax call.";
         }
+
+        if (!($stmt = $mysqli->prepare("UPDATE cs290sp15_fp_events SET
+                                        start_time = ?,
+                                        end_time=?,
+                                        event_name=?,
+                                        lat=?,
+                                        lng=?
+                                        WHERE event_id = ?")
+        )) {
+            $responseobj['errorMsg'] = "Error with prepare statement" . $stmt->errno . " " . $stmt->error;
+        }
+
+        if (!($stmt->bind_param("sssi", $_POST['start_time'], $_POST['end_time'], $_POST['name'], $_POST['event_id'], $_POST['lat'], $_POST['lng']))) {
+            $responseobj['errorMsg'] = "Error binding parameters" . $stmt->errno . " " . $stmt->error;
+        }
+
+        if (!$stmt->execute()) {
+            $responseobj['errorMsg'] = "Error executing prepared statement" . $stmt->errno . " " . $stmt->error;
+        } else {
+            $successfulsave = true;
+        }
+        $stmt->close();
+
+        $responseobj['timeline_id'] = $_POST['timeline_id'];
+        $responseobj['event_id'] = $_POST['event_id'];
+        $responseobj['success'] = $successfulsave;
+        $responsetxt = array(
+            'callType' => 'saveEvent',
+            'content' => $responseobj
+        );
+        $responsetxt = json_encode($responsetxt);
     }
     
 // DELETE EXISTING EVENT
@@ -310,8 +309,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
           // If this triggers then somehow the timeline ID has changed without the session being updated.
           // Do not update the event in this case but instead send an error to the client
-          $responseobj['errorMsg'] = "Timeline conflict error.  Active session timeline does not match ajax call.  Aborting delete.";
-        } else {
+          $responseobj['errorMsg'] = "Warning: Timeline conflict.  Active session timeline does not match ajax call.";
+        }
         
             // check that row actually exists before deleting
             if (!($stmt = $mysqli->prepare("SELECT * FROM cs290sp15_fp_events WHERE event_id = ?"))) {
@@ -361,7 +360,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
             
             $responsetxt = json_encode($responsetxt);
+    }
+ 
+// GET EVENT DATA FOR TIMELINE
+    if ($_POST['action'] === 'getEventData') {
+    
+        $successful = false;
+        
+        if ($_SESSION['active_timeline'] != $_POST['timeline_id']) {
+          // If this triggers then somehow the timeline ID has changed without the session being updated.
+          // Do not add the event in this case but instead send an error to the client
+          $responseobj['errorMsg'] = "Warning: Timeline conflict.  Active session timeline does not match ajax call.";
         }
+        
+            if (!($stmt = $mysqli->prepare("SELECT event_id, start_time, end_time, event_name, lat, lng
+                                            FROM cs290sp15_fp_events
+                                            WHERE fk_timeline_id = ?")
+            )) {
+                $responseobj['errorMsg'] = "Error with prepare statement" . $stmt->errno . " " . $stmt->error;
+            }
+        
+            if (!($stmt->bind_param("i", $_POST['timeline_id']))) {
+                $responseobj['errorMsg'] = "Error binding parameters" . $stmt->errno . " " . $stmt->error;
+            }
+
+            if (!$stmt->execute()) {
+                $responseobj['errorMsg'] = "Error executing prepared statement" . $stmt->errno . " " . $stmt->error;
+            }
+
+            if (!$stmt->bind_result($eid, $stime, $etime, $ename, $lat, $lng)) {
+                $responseobj['servermsg'] = "Error binding result";
+                $repsonseobj['errno'] = $stmt->errno;
+                $repsonseobj['error'] = $stmt->error;
+            }
+            
+            $i = 0;
+            while ($stmt->fetch()) {
+                $eventObj = array(
+                    'id'         => $eid,
+                    'name'       => $ename,
+                    'start_time' => $stime,
+                    'end_time'   => $etime,
+                    'lat'        => $lat,
+                    'lng'        => $lng
+                );
+                $responseobj[$i] = $eventObj;
+                $i = $i + 1;
+            }
+            $stmt->close();
+        
+            $responseobj['timeline_id'] = $_POST['timeline_id'];
+            $responseobj['success'] = $successful;
+            $responseobj['num_events'] = $i;
+            $responsetxt = array(
+                'callType' => 'getEventData',
+                'content' => $responseobj
+            );
+            $responsetxt = json_encode($responsetxt);
     }
  
 }
