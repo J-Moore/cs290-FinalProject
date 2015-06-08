@@ -280,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $responseobj['errorMsg'] = "Error with prepare statement" . $stmt->errno . " " . $stmt->error;
         }
 
-        if (!($stmt->bind_param("sssi", $_POST['start_time'], $_POST['end_time'], $_POST['name'], $_POST['event_id'], $_POST['lat'], $_POST['lng']))) {
+        if (!($stmt->bind_param("sssddi", $_POST['start_time'], $_POST['end_time'], $_POST['name'], $_POST['lat'], $_POST['lng'], $_POST['event_id']))) {
             $responseobj['errorMsg'] = "Error binding parameters" . $stmt->errno . " " . $stmt->error;
         }
 

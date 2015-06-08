@@ -28,7 +28,7 @@ document.addEventListener('click', function(e) {
         clickedLI = $(e.target).parents( "li" )[0];
         selected = clickedLI.id;
       }
-      console.log(selected);
+      //console.log(selected);
       if (typeof selected == 'undefined' || selected == 'event-frame') {
         return false;
       }
@@ -36,7 +36,7 @@ document.addEventListener('click', function(e) {
       clickedLI = document.getElementById(selected);
       
       selectedEvent = selected.slice(2);
-      console.log(selectedEvent);
+      //console.log(selectedEvent);
       for (i = 0; i < ulParent.children.length; i++) {
         ulParent.children[i].children[1].style.backgroundColor = "white";
       }
@@ -281,7 +281,7 @@ function initializeMap() {
   var lastZoom = 5;
   
   for (var i = 0; i < timelineEvents.length; i++) {
-    console.log(timelineEvents[i]);
+    //console.log(timelineEvents[i]);
     if (typeof timelineEvents[i] == 'undefined') {
       continue;
     }
@@ -305,13 +305,12 @@ function initializeMap() {
   var click = document.getElementById('click');
   
   map.on('click', function(e) {
-    console.log(e.latlng.toString());
-    console.log(e.latlng);
+    //console.log(e.latlng.toString());
+    //console.log(e.latlng);
 
-      
     if (typeof timelineEvents[selectedEvent] != 'undefined') {
-      console.log('old lat', timelineEvents[selectedEvent]['lat']);
-      console.log('old lng', timelineEvents[selectedEvent]['lng']);
+      //console.log('old lat', timelineEvents[selectedEvent]['lat']);
+      //console.log('old lng', timelineEvents[selectedEvent]['lng']);
       
       // if no marker exists for this then create one
       if (isNaN(timelineEvents[selectedEvent]['lat']) && isNaN(timelineEvents[selectedEvent]['lng'])) {
@@ -332,17 +331,12 @@ function initializeMap() {
         var newLatLng = new L.LatLng(e.latlng.lat, e.latlng.lng);
         timelineEvents[selectedEvent]['marker'].setLatLng(newLatLng);
       }
-
-      
     }
-    console.log(timelineEvents[selectedEvent + '']);
-    console.log(timelineEvents);
-    
+    //console.log(timelineEvents[selectedEvent + '']);
+    //console.log(timelineEvents);
     
   });
   
-  
-
 }
 
 function initializeTimelineEvents(tid) {
@@ -440,6 +434,10 @@ function massageDate(datetimeobj) {
     return massagedDate;
 }
 
+function massageDecimalForSQL(dbl) {
+  var num = dbl.toFixed(10);
+  return parseFloat(num);
+}
 
 // CREATE A NEW EVENT FROM OVERLAY FORM
 
@@ -590,7 +588,7 @@ function delete_event(num) {
 }
 
 function edit_event_details(num) {
-  console.log('editing event');
+  //console.log('editing event');
   
   $("#edit-overlay").fadeIn(300);
   $("body").append("<div id='mask'></div>");
@@ -850,8 +848,8 @@ function update_element(num) {
     
     var handler1 = timeToValue(eventStartDate, timelineStartDate);
     var handler2 = timeToValue(eventEndDate, timelineStartDate);
-    console.log(handler1);
-    console.log(handler2);
+    //console.log(handler1);
+    //console.log(handler2);
 
     // UPDATE slider
     $( "#slider" + num ).slider( "option", "values", [handler1, handler2]);
@@ -873,8 +871,8 @@ function save_event_details(num) {
     timeline_id: timelineID,
     start_time: convertToSQLDatestring(timelineEvents[num]['start_time']),
     end_time: convertToSQLDatestring(timelineEvents[num]['end_time']),
-    lat: timelineEvents[num]['lat'],
-    lng: timelineEvents[num]['lng']
+    lat: massageDecimalForSQL(timelineEvents[num]['lat']),
+    lng: massageDecimalForSQL(timelineEvents[num]['lng'])
   }
 
   // Checking that values are defined for variables we need to save to the database
@@ -1174,7 +1172,7 @@ function responseDeleteEvent(responseObj) {
 }
 
 function responseFillEventData(responseObj) {
-  console.log(responseObj);
+  //console.log(responseObj);
   var iter = responseObj['num_events'];
   
   for (var i = 0; i < iter; i++) {
@@ -1189,7 +1187,7 @@ function responseFillEventData(responseObj) {
     
   }
   
-  console.log(timelineEvents);
+  //console.log(timelineEvents);
   initializeMap();
 }
 
