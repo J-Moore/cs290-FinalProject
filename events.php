@@ -185,7 +185,7 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
         </ul>
       </div>
       
-      <div id='overlay' class='create-popup'>
+      <div id='add-overlay' class='create-popup'>
       <a href="#" class="close"><img src="resources/images/close.png" class="btn_close" title="Close Window" alt="Close" /></a>
       <p>Create New Event
       <form id='create-event-form'>
@@ -221,6 +221,42 @@ if (!($stmt = $mysqli->prepare("SELECT event_id, event_name, start_time, end_tim
       </form>
       </div>
     
+    
+      <div id='edit-overlay' class='create-popup'>
+      <a href="#" class="close"><img src="resources/images/close.png" class="btn_close" title="Close Window" alt="Close" /></a>
+      <p>Edit Event
+      <form id='edit-event-form'>
+        <p><label>Name
+           <input type='text' id='edit-event-name' /></label>
+        <p><label>Start Date & Time:
+           <input type='text' id='edit-datepicker-start' /></label>
+           <input type='number' id='edit-time-hour-start' min=0 max=23 /> :
+           <input type='number' id='edit-time-min-start' min=0 max=59 />
+           <select id='edit-select-ampm-start'>
+             <option>AM</option>
+             <option>PM</option>
+           </select>
+           
+        <p><label>End Date & Time:
+           <input type='text' id='edit-datepicker-end' /></label>
+           <input type='number' id='edit-time-hour-end' min=0 max=23 /> :
+           <input type='number' id='edit-time-min-end' min=0 max=59 />
+           <select id='edit-select-ampm-end'>
+             <option>AM</option>
+             <option>PM</option>
+           </select>
+           
+        <div class='error-msg' id='edit-error-msg'></div>
+        
+        <div class='div-button' id='update-edit-event' >
+          Update
+        </div>
+        
+        <div class='div-button' id='cancel-new-event'>
+          Cancel
+        </div>
+      </form>
+      </div>
     </div>
     
   </body>

@@ -64,10 +64,10 @@ $(function() {
   
   var timeDiff = Math.round(Math.abs(timelineEndDate.getTime() - timelineStartDate.getTime()) / 60000);
 
-  console.log('time difference of timeline upon load:');
-  console.log(timelineStartDate);
-  console.log(timelineEndDate);
-  console.log(timeDiff);
+  //console.log('time difference of timeline upon load:');
+  //console.log(timelineStartDate);
+  //console.log(timelineEndDate);
+  //console.log(timeDiff);
   
   // store start and end times of event attributes into 
   // REWORK THIS: instead have page do AJAX call to get Event data after loading so we
@@ -84,7 +84,7 @@ $(function() {
     var max = new Date(sliders[i].parentNode.children[1].children[0].lastChild.children[2].children[0].getAttribute("name"));
     
     var current = "#slider" + eventID;
-    console.log(current);
+    //console.log(current);
     
     eventObj['id'] = eventID;
     eventObj['name'] = eventName;
@@ -115,10 +115,10 @@ $(function() {
     var startDisplay = "#startdisplay" + eventID;
     var endDisplay = "#enddisplay" + eventID;
     
-    console.log('initializing slider variables:');
-    console.log(current);
-    console.log(startDisplay);
-    console.log(endDisplay);
+    //console.log('initializing slider variables:');
+    //console.log(current);
+    //console.log(startDisplay);
+    //console.log(endDisplay);
     
     // start and stop times from database are stored in the name values of the description
 
@@ -137,7 +137,7 @@ $(function() {
   
   // CREATING NEW EVENTS
   $("#add-event").click(function() {
-    $(".create-popup").fadeIn(300);
+    $("#add-overlay").fadeIn(300);
     
     $("body").append("<div id='mask'></div>");
     $("#mask").fadeIn(300);
@@ -160,7 +160,7 @@ $(function() {
     return false;
   });
   
-  // DATEPICKERS FOR CREATING EVENTS
+  // DATEPICKERS FOR CREATING & EDITING EVENTS
   $( "#datepicker-start" ).datepicker({
     defaultDate: "+1w",
     changeMonth: true,
@@ -185,6 +185,31 @@ $(function() {
       $( "datepicker-start" ).datepicker( "option", "maxDate", selectedDate );
     }
   });
+  
+    $( "#edit-datepicker-start" ).datepicker({
+    defaultDate: "+1w",
+    changeMonth: true,
+    changeYear: true,
+    defaultDate: timelineStartDate,
+    minDate: timelineStartDate,
+    maxDate: timelineEndDate,
+    onClose: function( selectedDate ) {
+      $( "#edit-datepicker-end" ).datepicker( "option", "minDate", selectedDate );
+    }
+  });
+  
+  
+  $( "#edit-datepicker-end" ).datepicker({
+    defaultDate: "+1w",
+    changeMonth: true,
+    changeYear: true,
+    defaultDate: timelineStartDate,
+    minDate: timelineStartDate,
+    maxDate: timelineEndDate,
+    onClose: function( selectedDate ) {
+      $( "edit-datepicker-start" ).datepicker( "option", "maxDate", selectedDate );
+    }
+  });
 
   var sMonth = timelineStartDate.getMonth() + 1;
   var sYear = timelineStartDate.getFullYear();
@@ -198,6 +223,7 @@ $(function() {
   var defaultTime = sMonth + "/" + sDay + "/" + sYear;
   $( "#datepicker-start" ).val(defaultTime);
   $( "#datepicker-end" ).val(defaultTime);
+  
   
 });
 
@@ -290,8 +316,8 @@ function massageDate(datetimeobj) {
 // CREATE A NEW EVENT FROM OVERLAY FORM
 
 function createNewEvent() {
-  console.log('create new event');
-  console.log(timelineEvents);
+  //console.log('create new event');
+  //console.log(timelineEvents);
 
   // validate input section
   var eName = document.getElementById('event-name').value;
@@ -412,7 +438,7 @@ function createNewEvent() {
       end_time: massageDate(eventEndDate)
     }
     
-    console.log(parameters);
+    //console.log(parameters);
     ajaxRequest(callType, parameters);
   }
   
@@ -438,6 +464,276 @@ function delete_event(num) {
 function edit_event_details(num) {
   console.log('editing event');
   
+  $("#edit-overlay").fadeIn(300);
+  $("body").append("<div id='mask'></div>");
+  $("#mask").fadeIn(300);
+  
+  // add dynamic onclick so that it passes the eventID when we confirm editing
+  var updateBtn = document.getElementById('update-edit-event');
+  var updateFunction = 'update_element(' + num + ')'
+  updateBtn.setAttribute('onclick', updateFunction);
+  
+  // set current values of event to fill in form
+  var eventName = document.getElementById('edit-event-name');
+  eventName.setAttribute('value', timelineEvents[num]['name']);
+  var eventStartHour = document.getElementById('edit-time-hour-start');
+  var eventStartMin = document.getElementById('edit-time-min-start');
+  var eventEndHour = document.getElementById('edit-time-hour-end');
+  var eventEndMin = document.getElementById('edit-time-min-end');
+  
+  // break apart datestring to display it in edit fields
+  var datestring = timelineEvents[num]['start_time'];
+  var year = "";
+  var month = "";
+  var day = "";
+  var hour = "";
+  var min = "";
+  
+  if (typeof datestring == 'object') {
+    year = datestring.getFullYear();
+    month = datestring.getMonth();
+    day = datestring.getDate();
+    hour = datestring.getHours();
+    min = datestring.getMinutes();
+  } else {
+    for (var i = 0; i < datestring.length; i++) {
+      if (datestring[i] == '/') {
+        i += 1;
+        break;
+      }
+      month += datestring[i];
+    }
+  
+    for ( ; i < datestring.length; i++) {
+      if (datestring[i] == '/') {
+        i += 1;
+        break;
+      }
+      day += datestring[i];
+    }
+  
+    for ( ; i < datestring.length; i++) {
+      if (datestring[i] == ',') {
+        i += 2;
+        break;
+      }
+      year += datestring[i];
+    }
+  
+    for ( ; i < datestring.length; i++) {
+      if (datestring[i] == ':') {
+        i += 1;
+        break;
+      }
+      hour += datestring[i];
+    }
+    
+    min = datestring.slice(i);
+  }
+  
+  if (month.length < 2) {
+    month = "0" + month;
+  }
+  
+  if (day.length < 2) {
+    day = "0" + day;
+  }
+  
+  var startDate = month + "/" + day + "/" + year;
+  $( "#edit-datepicker-start" ).datepicker( "setDate", startDate);
+  eventStartHour.setAttribute('value', hour);
+  eventStartMin.setAttribute('value', min);
+  
+  // break apart ending time for displaying in form
+  datestring = timelineEvents[num]['end_time'];
+  year = "";
+  month = "";
+  day = "";
+  hour = "";
+  min = "";
+  
+  if (typeof datestring == 'object') {
+    year = datestring.getFullYear();
+    month = datestring.getMonth();
+    day = datestring.getDate();
+    hour = datestring.getHours();
+    min = datestring.getMinutes();
+  } else {
+    for (var i = 0; i < datestring.length; i++) {
+      if (datestring[i] == '/') {
+        i += 1;
+        break;
+      }
+      month += datestring[i];
+    }
+  
+    for ( ; i < datestring.length; i++) {
+      if (datestring[i] == '/') {
+        i += 1;
+        break;
+      }
+      day += datestring[i];
+    }
+  
+    for ( ; i < datestring.length; i++) {
+      if (datestring[i] == ',') {
+        i += 2;
+        break;
+      }
+      year += datestring[i];
+    }
+  
+    for ( ; i < datestring.length; i++) {
+      if (datestring[i] == ':') {
+        i += 1;
+        break;
+      }
+      hour += datestring[i];
+    }
+    
+    min = datestring.slice(i);
+  }
+  
+  if (month.length < 2) {
+    month = "0" + month;
+  }
+  
+  if (day.length < 2) {
+    day = "0" + day;
+  }
+  
+  var endDate = month + "/" + day + "/" + year;
+  $( "#edit-datepicker-end" ).datepicker( "setDate", endDate);
+  eventEndHour.setAttribute('value', hour);
+  eventEndMin.setAttribute('value', min);
+}
+
+// function for updating the element from the Edit Event overlay
+function update_element(num) {
+  // fade out overlay
+  $(".create-popup").fadeOut(300);
+  $('#mask , .login-popup').fadeOut(300, function () {
+    $('#mask').remove();
+  });
+  
+  // validate input section
+  var eName = document.getElementById('edit-event-name').value;
+  var startDate = document.getElementById('edit-datepicker-start').value;
+  var startHour = document.getElementById('edit-time-hour-start').value;
+  var startMin = document.getElementById('edit-time-min-start').value;
+  var startAMPM = document.getElementById('edit-select-ampm-start').value;
+  var endDate = document.getElementById('edit-datepicker-end').value;
+  var endHour = document.getElementById('edit-time-hour-end').value;
+  var endMin = document.getElementById('edit-time-min-end').value;
+  var endAMPM = document.getElementById('edit-select-ampm-end').value;
+  
+  var errorDiv = document.getElementById('edit-error-msg');
+  var no_errors = true;
+  
+  errorDiv.innerHTML = "";
+  
+  // create starting and ending date strings
+  if (startAMPM === 'PM' && parseInt(startHour, 10) < 12) {
+    startHour = parseInt(startHour, 10) + 12;
+    startHour += "";
+  }
+  if (startAMPM === 'AM' && parseInt(startHour, 10) === 12) {
+    startHour = "00";
+  }
+  
+  if (endAMPM === 'PM' && parseInt(endHour, 10) < 12) {
+    endHour = parseInt(endHour, 10) + 12;
+    endHour += "";
+  }
+  if (endAMPM === 'AM' && parseInt(endHour, 10) === 12) {
+    endHour = "00";
+  }
+  
+  var startDateTimeStr = startDate + " " + startHour + ":" + startMin + ":00";
+  var endDateTimeStr = endDate + " " + endHour + ":" + endMin + ":00";
+  var eventStartDate = new Date(startDateTimeStr);
+  var eventEndDate = new Date(endDateTimeStr);
+
+    
+  if (eName == "") {
+    var errorNameMsg = document.createTextNode('Please enter a name.\n');
+    var errorP = document.createElement('p');
+    errorP.appendChild(errorNameMsg);
+    errorDiv.appendChild(errorP);
+    no_errors = false;
+  }
+  
+  if (eventStartDate == 'Invalid Date') {
+    var errorNameMsg = document.createTextNode('Invalid Starting Date, please check the date and time entered.\n');
+    var errorP = document.createElement('p');
+    errorP.appendChild(errorNameMsg);
+    errorDiv.appendChild(errorP);
+    no_errors = false;
+  }
+  
+    if (eventEndDate == 'Invalid Date') {
+    var errorNameMsg = document.createTextNode('Invalid Ending Date, please check the date and time entered.\n');
+    var errorP = document.createElement('p');
+    errorP.appendChild(errorNameMsg);
+    errorDiv.appendChild(errorP);
+    no_errors = false;
+  }
+  
+  if (eventStartDate > eventEndDate) {
+    var errorNameMsg = document.createTextNode('Ending Date must come after Starting Date.\n');
+    var errorP = document.createElement('p');
+    errorP.appendChild(errorNameMsg);
+    errorDiv.appendChild(errorP);
+    no_errors = false;
+  }
+  
+  if (startDate == "" || endDate == "") {
+    var errorStartMsg = document.createTextNode('Please enter starting & ending dates.\n');
+    var errorP = document.createElement('p');
+    errorP.appendChild(errorStartMsg);
+    errorDiv.appendChild(errorP);
+    no_errors = false;
+  }
+  
+  if (eventStartDate < timelineStartDate || eventEndDate > timelineEndDate) {
+    var errorNameMsg = document.createTextNode('Event must fall within Timeline date range.');
+    var errorP = document.createElement('p');
+    errorP.appendChild(errorNameMsg);
+    errorDiv.appendChild(errorP);
+    no_errors = false;
+  }
+  
+  if (no_errors == true) {
+  
+    var callType = 'saveEvent';
+    
+    var parameters = {
+      name: eName,
+      event_id: num,
+      timeline_id: timelineID,
+      start_time: massageDate(eventStartDate),
+      end_time: massageDate(eventEndDate)
+    }
+    
+    // UPDATE global array
+    timelineEvents[num]['start_time'] = eventStartDate;
+    timelineEvents[num]['end_time'] = eventEndDate;
+    timelineEvents[num]['name'] = eName;
+    
+    var handler1 = timeToValue(eventStartDate, timelineStartDate);
+    var handler2 = timeToValue(eventEndDate, timelineStartDate);
+    console.log(handler1);
+    console.log(handler2);
+
+    // UPDATE slider
+    $( "#slider" + num ).slider( "option", "values", [handler1, handler2]);
+    $( "#slider" + num ).focus();
+    
+    
+    //console.log(parameters);
+    ajaxRequest(callType, parameters);
+  }
+    
 }
 
 function save_event_details(num) {
@@ -477,7 +773,7 @@ function save_event_details(num) {
     saveBool = false;
   }
   
-  console.log(parameters);
+  //console.log(parameters);
   
   if (saveBool == true) {
     ajaxRequest(callType, parameters);
@@ -526,19 +822,19 @@ function responseSaveEvent(responseObj) {
   if (responseObj['success'] === true) {
     msg = 'Event #' + responseObj['event_id'] + ' saved to timeline #' + responseObj['timeline_id'];
     displayServerMessage(msg, -1)
-    console.log('save successful');
+    //console.log('save successful');
   } else {
     msg = 'Unable to Save Event #' + responseObj['event_id'] + ' to timeline #' + responseObj['timeline_id'];
     displayServerMessage(msg, responseObj['errorMsg']);
-    console.log('save unsuccessful');
+    //console.log('save unsuccessful');
   }
 }
 
 function responseAddEvent(responseObj) {
-  console.log('responseAddEvent() entered');
+  //console.log('responseAddEvent() entered');
   var msg;
   if (responseObj['success'] == true) {
-    console.log('Add Event Success = True');
+    //console.log('Add Event Success = True');
     msg = 'Event #' + responseObj['event_id'] + ' saved to timeline #' + responseObj['timeline_id'];
     displayServerMessage(msg, -1)
     
@@ -694,11 +990,11 @@ function responseAddEvent(responseObj) {
     var timeDiff = Math.round(Math.abs(timelineEndDate.getTime() - timelineStartDate.getTime()) / 60000);
 
     
-    console.log('min', min);
-    console.log('max', max);
-    console.log('timeToValue(min)', timeToValue(min, timelineStartDate));
-    console.log('timeToValue(min)', timeToValue(max, timelineStartDate));
-    console.log('timeDiff', timeDiff);
+    //console.log('min', min);
+    //console.log('max', max);
+    //console.log('timeToValue(min)', timeToValue(min, timelineStartDate));
+    //console.log('timeToValue(min)', timeToValue(max, timelineStartDate));
+    //console.log('timeDiff', timeDiff);
     
     $( current ).slider({
       range: true,
@@ -710,11 +1006,11 @@ function responseAddEvent(responseObj) {
     });
     
     
-    console.log('save successful');
+    //console.log('save successful');
   } else {
     msg = 'Unable to Save Event #' + responseObj['event_id'] + ' to timeline #' + responseObj['timeline_id'];
     displayServerMessage(msg, responseObj['errorMsg']);
-    console.log('save unsuccessful');
+    //console.log('save unsuccessful');
   }
 }
 
@@ -725,8 +1021,8 @@ function responseDeleteEvent(responseObj) {
     displayServerMessage(msg, -1)
     
     // remove event from local array
-    console.log('DELETING');
-    console.log(timelineEvents[responseObj['event_id']])
+    //console.log('DELETING');
+    //console.log(timelineEvents[responseObj['event_id']])
     timelineEvents[responseObj['event_id']] = {};
     timelineEvents.splice(responseObj['event_id'], 1);
     
@@ -737,11 +1033,11 @@ function responseDeleteEvent(responseObj) {
     var deletedElementLI = deletedElementSlider.parentNode;
     ulParent.removeChild(deletedElementLI);
     
-    console.log('delete successful');
+    //console.log('delete successful');
   } else {
     msg = 'Unable to Delete Event #' + responseObj['event_id'];
     displayServerMessage(msg, responseObj['errorMsg']);
-    console.log('delete unsuccessful');
+    //console.log('delete unsuccessful');
   }
 }
 
@@ -754,7 +1050,7 @@ function ajaxRequest(callType, parameters) {
   var paraString = 'action=' + callType + '&' + getParaString(parameters);
   var urlString = url + phpFile;
   
-  console.log(paraString);
+  //console.log(paraString);
 
   var req = new XMLHttpRequest();
   if (!req) {
@@ -765,8 +1061,8 @@ function ajaxRequest(callType, parameters) {
     if (this.readyState === 4) {
       var response = JSON.parse(this.responseText);
 
-      console.log('JSON RESPONSE OBJECT:');
-      console.log(response);
+      //console.log('JSON RESPONSE OBJECT:');
+      //console.log(response);
       
       /* Responses:
        *  1. event saved successfully
