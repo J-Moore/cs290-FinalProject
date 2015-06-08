@@ -41,7 +41,7 @@ if (!$mysqli || $mysqli->connect_errno) {
       <div class='top-element' id='log-in-greeting'>Welcome, 
 <?php echo $_SESSION['username']?></div>
 
-      <div class='top-element' id='log-out-btn'><a href="logout.php" class='logout-btn'>Log out</a></div>
+      <div class='top-element logout-btn' id='log-out-btn'><a href="logout.php">Log out</a></div>
     </div>
     
     <!-- MAIN DIV -->

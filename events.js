@@ -80,11 +80,14 @@ var sliderToolTip = function(event, ui) {
 }
 
 $(function() {
-
+  $( "#instructions" ).accordion({
+    active: false,
+    collapsible: true
+  });
   
   $( "#event-display" ).sortable();
-  $( "#event-display" ).disableSelection();
-  $( "#event-display" ).selectable();
+  //$( "#event-display" ).disableSelection();
+  //$( "#event-display" ).selectable();
   
 
   var sliders = document.getElementsByClassName("timeline-half");

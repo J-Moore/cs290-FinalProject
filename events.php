@@ -74,13 +74,23 @@ $stmt->close();
       <div class='top-element' id='page-title'>Timeline / Itinerary Creator</div>
       <div class='top-element' id='log-in-greeting'>Welcome, 
 <?php echo $_SESSION['username']?></div>
-
-      <div class='top-element' id='log-out-btn'><a href="logout.php" class='logout-btn'>Log out</a></div>
+      <div class='top-element logout-btn' id='back-btn'><a href="timelines.php">Back to Timelines</a></div>
+      <div class='top-element logout-btn' id='log-out-btn'><a href="logout.php">Log out</a></div>
     </div>
     
         
     <!-- DIV FOR DISPLAYING MESSAGES REGARDING DATABASE CHANGES -->
     <div id='server-message-div'></div>
+    <div id='instructions'>
+      <h3>Click for Instructions</h3>
+      <div>
+        <p>Add Events to your Timeline
+        <p>Use Sliders to adjust Event Times.  Events can be shuffled around but position is not saved.
+        <p>In order to set locations to your events, first select an event that you have created.  You will know it is selected when the description background turns yellow.  It can be a bit buggy in actually selecting.  Once selected, click on the map to place a marker for your event.  Markers currently cannot be dragged or deleted.
+        <p>Saving via the Edit Event button is currently buggy.  It will not update event location, and it will not update the slider visually.  The slider display is a limitation of JQuery UI; once you click on the slider it will automatically update to the correct position.  I cannot find a handler that updates the slider visually from updating it's value dynamically.
+      </div>
+        
+    </div>
     
     <!-- MAIN DIV -->
     

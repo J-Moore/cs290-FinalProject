@@ -57,6 +57,31 @@ td {
     width: 100%;
 }
 
+.top-element {
+    float: left;
+    font-family: Trebuchet MS, Tahoma, Verdana, Arial, sans-serif;
+    font-weight: bold;
+    height: 50px;
+    margin-left: 20px;
+    width: 100px;
+}
+
+#page-title {
+    width: 60%;
+    font-size: 140%;
+}
+
+.logout-btn {
+    border: 1px solid;
+}
+
+.logout-btn:hover {
+    cursor: pointer;
+    background-color: #F2F2F2;
+}
+
+
+
 #register-form {
     background-color: pink;
     display: none;
