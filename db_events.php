@@ -5,6 +5,12 @@ header('Content-type: text/html');
 
 session_start();
 
+// MOVE THESE ONCE YOU HAVE FIXED THE INCLUDE ISSUE
+$dbhost = "localhost";
+$dbuser = "jonatho1_cs290fp";
+$dbpw = "c\$29op4SS";
+$dbname = "jonatho1_portfolio_db";
+
 // hash code taken from security lecture slides
 // minimum length of 8 required on passwords for this hash to work
 $encryptKey = 'minotaur75zodiac!brave';
@@ -20,8 +26,8 @@ $responseobj = array(
     'errorMsg' => ""
 );
 
-include 'local_settings.php';
-$mysqli = new mysqli("oniddb.cws.oregonstate.edu", "moorjona-db", $dbpw, "moorjona-db");
+//include('local_settings.php');
+$mysqli = new mysqli($dbhost, $dbuser, $dbpw, $dbname);
 if (!$mysqli || $mysqli->connect_errno) {
     echo "Connection error " . $mysqli->connect_errno . " " . $mysqli->connect_error;
 }

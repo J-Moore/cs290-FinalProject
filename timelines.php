@@ -7,13 +7,19 @@ $filePath = explode('/', $_SERVER['PHP_SELF'], -1);
 $filePath = implode('/', $filePath);
 $redirect = "http://" . $_SERVER['HTTP_HOST'] . $filePath;
 
+// MOVE THESE ONCE YOU HAVE FIXED THE INCLUDE ISSUE
+$dbhost = "localhost";
+$dbuser = "jonatho1_cs290fp";
+$dbpw = "c\$29op4SS";
+$dbname = "jonatho1_portfolio_db";
+
 session_start();
 if(!isset($_SESSION['login_user'])) {
   header("Location: {$redirect}/login.php", true);
 }
 
-include 'local_settings.php';
-$mysqli = new mysqli("oniddb.cws.oregonstate.edu", "moorjona-db", $dbpw, "moorjona-db");
+//include('local_settings.php');
+$mysqli = new mysqli($dbhost, $dbuser, $dbpw, $dbname);
 if (!$mysqli || $mysqli->connect_errno) {
     echo "Connection error " . $mysqli->connect_errno . " " . $mysqli->connect_error . "\n";
     echo "Unable to retrieve data from server.  Please contact the server administartor.";

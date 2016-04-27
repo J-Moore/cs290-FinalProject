@@ -164,7 +164,7 @@ function gotoTimeline(respObj) {
 function ajaxRequest(callType, parameters) {
 
   var url =
-      'http://web.engr.oregonstate.edu/~moorjona/cs290/FinalProject/';
+      'http://www.jonathonwmoore.com/jonwmoore/SchoolProjects/CS290/FinalProject/';
   var phpFile = 'db_events.php';
 
   var paraString = 'action=' + callType + '&' + getParaString(parameters);
